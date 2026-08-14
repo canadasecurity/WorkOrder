@@ -1,0 +1,443 @@
+/* Step 2 — Work Order preview matching paper form */
+
+.preview-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: rgba(255, 255, 255, 0.97);
+  border-bottom: 1px solid #dee2e6;
+  padding: 0.75rem 0;
+  margin: -0.5rem 0 1rem;
+}
+
+.preview-hint {
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.preview-viewport {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 1.5rem;
+}
+
+.preview-scale-wrap {
+  width: 816px;
+  margin: 0 auto;
+  transform-origin: top center;
+  overflow: hidden;
+}
+
+.wo-page {
+  width: 816px;
+  min-height: 1056px;
+  background: #fff;
+  color: #000;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  padding: 14px 18px 12px;
+  box-sizing: border-box;
+  font-family: "Times New Roman", Times, Georgia, serif;
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.wo-page * {
+  box-sizing: border-box;
+}
+
+/* ===== Header ===== */
+.wo-header {
+  display: grid;
+  grid-template-columns: 108px 1fr 118px;
+  gap: 8px;
+  align-items: start;
+}
+
+.wo-logo {
+  width: 96px;
+  height: 96px;
+  display: block;
+  margin: 0 auto;
+  object-fit: contain;
+  object-position: center top;
+}
+
+.wo-company {
+  text-align: center;
+  padding-top: 0;
+}
+
+.wo-company-name {
+  font-family: "Times New Roman", Times, serif;
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 2px;
+  letter-spacing: 0.01em;
+  line-height: 1.05;
+}
+
+.wo-company-line {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.wo-company-line.contact {
+  font-weight: 400;
+  font-size: 12px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.wo-meta {
+  text-align: center;
+  padding-top: 4px;
+}
+
+.wo-meta-label {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+
+.wo-number-box {
+  border: 1.5px solid #000;
+  padding: 8px 4px;
+  font-size: 18px;
+  font-weight: 700;
+  font-family: "Courier New", Courier, monospace;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wo-services {
+  text-align: center;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  margin: 8px 0 6px;
+}
+
+/* ===== Main bordered body ===== */
+.wo-body {
+  border: 2px solid #000;
+}
+
+.wo-value {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Client + Recommendation */
+.wo-top {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 2px solid #000;
+}
+
+.wo-client-col {
+  border-right: 1.5px solid #000;
+  display: flex;
+  flex-direction: column;
+}
+
+.wo-field-row {
+  display: grid;
+  grid-template-columns: 118px 1fr;
+  border-bottom: 1px solid #000;
+  min-height: 32px;
+}
+
+.wo-field-row:last-child {
+  border-bottom: none;
+}
+
+.wo-field-label {
+  padding: 5px 6px;
+  font-weight: 700;
+  border-right: 1px solid #000;
+}
+
+.wo-field-value {
+  padding: 5px 6px;
+}
+
+.wo-field-row.address {
+  min-height: 64px;
+}
+
+.wo-field-row.address .wo-field-label {
+  align-self: stretch;
+}
+
+.wo-po-date {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+}
+
+.wo-po-date .wo-field-row {
+  min-height: 30px;
+}
+
+.wo-po-date .wo-field-row:first-child {
+  border-bottom: 1px solid #000;
+}
+
+.wo-po-date .wo-field-label {
+  width: 48px;
+  grid-column: 1;
+  max-width: 48px;
+}
+
+.wo-po-date .wo-field-row {
+  grid-template-columns: 48px 1fr;
+}
+
+.wo-reco {
+  padding: 4px 6px 6px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.wo-reco-label {
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.wo-ruled {
+  flex: 1;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 21px,
+    #000 21px,
+    #000 22px
+  );
+  background-position: 0 0;
+  min-height: 110px;
+  padding-top: 0;
+}
+
+.wo-ruled .wo-value {
+  line-height: 22px;
+  font-size: 12px;
+  padding: 0 2px;
+}
+
+/* Job description */
+.wo-job {
+  border-bottom: 2px solid #000;
+  padding: 4px 6px 8px;
+  min-height: 168px;
+}
+
+.wo-job-label {
+  font-weight: 700;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.wo-job .wo-ruled {
+  min-height: 140px;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 19px,
+    #000 19px,
+    #000 20px
+  );
+}
+
+.wo-job .wo-ruled .wo-value {
+  line-height: 20px;
+}
+
+/* Materials — two tables + grey gutter */
+.wo-materials {
+  display: grid;
+  grid-template-columns: 1fr 28px 1fr;
+  border-bottom: 2px solid #000;
+}
+
+.wo-mat-gutter {
+  background: repeating-linear-gradient(
+    -45deg,
+    #d0d0d0,
+    #d0d0d0 1px,
+    #e8e8e8 1px,
+    #e8e8e8 4px
+  );
+  border-left: 1px solid #000;
+  border-right: 1px solid #000;
+}
+
+.wo-mat-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
+}
+
+.wo-mat-table th,
+.wo-mat-table td {
+  border: 1px solid #000;
+  padding: 2px 5px;
+  height: 24px;
+  vertical-align: middle;
+}
+
+.wo-mat-table th {
+  font-weight: 700;
+  text-align: left;
+  background: #fff;
+}
+
+.wo-mat-table .col-qty {
+  width: 48px;
+  text-align: center;
+}
+
+.wo-mat-table td.col-qty {
+  text-align: center;
+}
+
+/* Time table */
+.wo-time-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  border-bottom: 2px solid #000;
+}
+
+.wo-time-table th,
+.wo-time-table td {
+  border: 1px solid #000;
+  padding: 3px 5px;
+  vertical-align: middle;
+}
+
+.wo-time-table th {
+  background: #e6e6e6;
+  font-weight: 700;
+  text-align: left;
+  height: 24px;
+}
+
+.wo-time-table td {
+  height: 28px;
+}
+
+.wo-time-table .c-date {
+  width: 16%;
+}
+.wo-time-table .c-tech {
+  width: 36%;
+}
+.wo-time-table .c-start,
+.wo-time-table .c-end,
+.wo-time-table .c-total {
+  width: 16%;
+}
+
+/* Signatures */
+.wo-sign {
+  display: grid;
+  grid-template-columns: 34% 66%;
+  min-height: 110px;
+}
+
+.wo-sign-tech {
+  border-right: 1.5px solid #000;
+  padding: 4px 6px;
+  position: relative;
+}
+
+.wo-sign-tech-label {
+  font-weight: 700;
+}
+
+.wo-sign-img {
+  max-width: 95%;
+  max-height: 78px;
+  display: block;
+  margin: 6px auto 0;
+}
+
+.wo-sign-customer {
+  padding: 14px 12px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 22px;
+}
+
+.wo-sign-line {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  border-bottom: 1px solid #000;
+  min-height: 28px;
+  padding-bottom: 2px;
+}
+
+.wo-sign-line-label {
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.wo-sign-line-value {
+  flex: 1;
+  min-height: 24px;
+  display: flex;
+  align-items: flex-end;
+}
+
+.wo-sign-line-value img {
+  max-height: 42px;
+  max-width: 100%;
+}
+
+.wo-footer-tagline {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  margin: 10px 0 0;
+  font-family: "Times New Roman", Times, serif;
+}
+
+body.preview-mode .app-header {
+  display: none;
+}
+
+body.preview-mode main.container {
+  max-width: 100%;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+@media print {
+  body.preview-mode .preview-toolbar,
+  body.preview-mode .app-header {
+    display: none !important;
+  }
+
+  .preview-scale-wrap {
+    transform: none !important;
+    width: 816px !important;
+    height: auto !important;
+  }
+
+  .wo-page {
+    box-shadow: none;
+  }
+}

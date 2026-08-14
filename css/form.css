@@ -1,0 +1,142 @@
+/* Step 1 — mobile-friendly form styles */
+
+:root {
+  --csp-primary: #1a3a5c;
+  --csp-accent: #c8102e;
+}
+
+body {
+  background-color: #f4f6f8;
+}
+
+.app-header {
+  background: var(--csp-primary);
+  color: #fff;
+}
+
+.app-header .company-name {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.form-section-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--csp-primary);
+  border-bottom: 2px solid var(--csp-accent);
+  padding-bottom: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.work-order-badge {
+  font-family: ui-monospace, monospace;
+  font-size: 1.1rem;
+  font-weight: 700;
+  background: #fff;
+  color: var(--csp-primary);
+  border: 2px solid var(--csp-primary);
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.25rem;
+}
+
+.materials-table input {
+  font-size: 0.9rem;
+}
+
+.signature-wrapper {
+  border: 1px solid #ced4da;
+  border-radius: 0.375rem;
+  background: #fff;
+  touch-action: none;
+}
+
+.signature-wrapper canvas {
+  display: block;
+  width: 100%;
+  height: 160px;
+  cursor: crosshair;
+}
+
+.signature-actions {
+  border-top: 1px solid #dee2e6;
+  padding: 0.35rem 0.5rem;
+  background: #f8f9fa;
+}
+
+.step-panel {
+  display: none;
+}
+
+.step-panel.active {
+  display: block;
+}
+
+.sticky-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(6px);
+  border-top: 1px solid #dee2e6;
+  padding: 0.75rem 0;
+  margin-top: 1.5rem;
+}
+
+.form-label.required::after {
+  content: " *";
+  color: var(--csp-accent);
+}
+
+.required-note {
+  color: var(--csp-accent);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+/* Optional fields should remain neutral after a failed submit attempt. */
+.was-validated .form-control:not([required]):valid,
+.was-validated .form-select:not([required]):valid {
+  border-color: #ced4da;
+  background-image: none;
+  padding-right: 0.75rem;
+}
+
+/* Materials are validated as a group, not as ten independent required fields. */
+#workOrderForm.was-validated input[name^="material_"],
+#workOrderForm.was-validated input[name^="material_"]:valid,
+#workOrderForm.was-validated input[name^="material_"]:focus {
+  border-color: #ced4da !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  padding-right: 0.5rem !important;
+}
+
+.materials-invalid {
+  border-color: var(--csp-accent) !important;
+  box-shadow: 0 0 0 0.15rem rgba(200, 16, 46, 0.12);
+}
+
+.time-input {
+  cursor: pointer;
+  background-color: #fff;
+}
+
+/* Keep Tom Select usable on mobile */
+.ts-wrapper.form-select {
+  padding: 0;
+  border: none;
+}
+
+.ts-control {
+  min-height: 38px;
+}
+
+@media (max-width: 575.98px) {
+  .work-order-badge {
+    font-size: 1rem;
+  }
+}
