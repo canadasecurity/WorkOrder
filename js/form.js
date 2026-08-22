@@ -516,16 +516,6 @@ function validateForm(form) {
   const customerName = form.querySelector('#customerName').value.trim();
   const materialsFeedback = document.getElementById('materialsFeedback');
   const materialsCard = document.getElementById('materialsCard');
-  const hasMaterialRow = Array.from({ length: 10 }, (_, index) => {
-    const rowNumber = index + 1;
-    const qty =
-      form.querySelector(`[name="material_qty_${rowNumber}"]`)?.value.trim() ||
-      '';
-    const material =
-      form.querySelector(`[name="material_name_${rowNumber}"]`)?.value.trim() ||
-      '';
-    return qty && material;
-  }).some(Boolean);
 
   if (!addressId) {
     alert('Please select an address.');
@@ -542,16 +532,6 @@ function validateForm(form) {
     form.querySelector('#jobDescription').focus();
     return false;
   }
-  if (!hasMaterialRow) {
-    materialsFeedback?.classList.remove('d-none');
-    materialsFeedback?.classList.add('d-block');
-    materialsCard?.classList.add('materials-invalid');
-    form.querySelector('[name="material_qty_1"]').focus();
-    return false;
-  }
-  materialsFeedback?.classList.add('d-none');
-  materialsFeedback?.classList.remove('d-block');
-  materialsCard?.classList.remove('materials-invalid');
   if (!technician) {
     alert('Please select a technician.');
     form.querySelector('#technician')?.tomselect?.focus();
@@ -562,6 +542,9 @@ function validateForm(form) {
     form.querySelector('#customerName').focus();
     return false;
   }
+  materialsFeedback?.classList.add('d-none');
+  materialsFeedback?.classList.remove('d-block');
+  materialsCard?.classList.remove('materials-invalid');
   return true;
 }
 
