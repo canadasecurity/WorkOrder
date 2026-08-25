@@ -1,68 +1,85 @@
 /**
- * Generate year-based work order numbers.
- * Format: YYXXX where YY = last 2 digits of current year, XXX = sequence (001-999)
+ * Generate year-based work order numbers from server.
+ * Format: YYXXX where YY = last 2 digits of current year, XXX = sequence (001+)
  * Example: 26001 (2026, sequence 001), 27001 (2027, sequence 001)
- * Automatically resets to XXX001 on January 1st of each year.
+ * Counter is stored and incremented on the server for consistency across all devices.
  */
 
-/** Returns the next work order number and persists the counter. */
-export function getNextWorkOrderNumber() {
-  const next = getNextSequenceNumber();
-  const display = formatWorkOrderNumber(next);
-  return display;
-}
-
-/** Peek at current number without incrementing (for display on load). */
-export function peekWorkOrderNumber() {
-  const current = getCurrentSequenceNumber();
-  return formatWorkOrderNumber(current);
-}
-
-/**
- * Get the current sequence number for the year.
- * Returns the next number that will be used (without incrementing).
- */
-function getCurrentSequenceNumber() {
-  const key = getStorageKey();
-  let sequence = parseInt(localStorage.getItem(key) || '', 10);
-  
-  if (Number.isNaN(sequence)) {
-    sequence = 1; // First work order of the year
+/** Returns the next work order number (fetches from server and increments). */
+export async function getNextWorkOrderNumber() {
+  try {
+    const sequence = await fetchNextSequenceFromServer();
+    return formatWorkOrderNumber(sequence);
+  } catch (error) {
+    console.error('Failed to get work order number from server:', error);
+    throw new Error('Could not generate work order number. Please try again.');
   }
-  
-  return sequence;
 }
 
-/**
- * Get the next sequence number and increment the counter.
- */
-function getNextSequenceNumber() {
-  const key = getStorageKey();
-  let sequence = parseInt(localStorage.getItem(key) || '', 10);
-  
-  if (Number.isNaN(sequence)) {
-    sequence = 1; // First work order of the year
+/** Peek at current number without incrementing (fetches from server). */
+export async function peekWorkOrderNumber() {
+  try {
+    const sequence = await fetchCurrentSequenceFromServer();
+    return formatWorkOrderNumber(sequence);
+  } catch (error) {
+    console.error('Failed to peek work order number:', error);
+    // Fallback to a placeholder if server is unavailable
+    return '26???';
   }
-  
-  const current = sequence;
-  localStorage.setItem(key, String(sequence + 1));
-  
-  return current;
 }
 
 /**
- * Get the storage key for the current year.
- * Format: 'csp_work_order_counter_YYYY'
+ * Fetch the current sequence number from server without incrementing.
  */
-function getStorageKey() {
+async function fetchCurrentSequenceFromServer() {
   const year = new Date().getFullYear();
-  return `csp_work_order_counter_${year}`;
+  
+  const response = await fetch('/api/work-order/peek', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ year }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Server returned ${response.status}`);
+  }
+
+  const data = await response.json();
+  if (!data.ok || typeof data.sequence !== 'number') {
+    throw new Error('Invalid response from server');
+  }
+
+  return data.sequence;
+}
+
+/**
+ * Fetch the next sequence number from server and increment it.
+ */
+async function fetchNextSequenceFromServer() {
+  const year = new Date().getFullYear();
+  
+  const response = await fetch('/api/work-order/next', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ year }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Server returned ${response.status}`);
+  }
+
+  const data = await response.json();
+  if (!data.ok || typeof data.sequence !== 'number') {
+    throw new Error('Invalid response from server');
+  }
+
+  return data.sequence;
 }
 
 /**
  * Format the work order number as YYXXX
  * YY = last 2 digits of current year
- * XXX = padded sequence number
+ * XXX = sequence number (can be any length: 001, 0001, etc.)
  */
 function formatWorkOrderNumber(sequence) {
   const year = new Date().getFullYear();
@@ -73,6 +90,6 @@ function formatWorkOrderNumber(sequence) {
 
 /** Reserve the displayed number on successful submit (called later). */
 export function confirmWorkOrderUsed() {
-  // Already handled by getNextSequenceNumber()
+  // Already handled by fetchNextSequenceFromServer()
   // This function is kept for compatibility but no additional action needed
 }
