@@ -48,18 +48,38 @@ export async function fetchAppsScriptGet(appsScriptUrl, query = '') {
     ? `${appsScriptUrl}${appsScriptUrl.includes('?') ? '&' : '?'}${query.replace(/^\?/, '')}`
     : appsScriptUrl;
 
-  const res = await fetch(url, { redirect: 'follow' });
-  const text = await res.text();
-  let data;
-  try {
-    data = JSON.parse(text);
-  } catch {
-    console.error('Apps Script GET raw:', text.slice(0, 300));
-    const err = new Error(
-      'Apps Script returned non-JSON. Redeploy Code.gs as a New version.'
-    );
-    err.statusCode = 502;
-    throw err;
+  let lastError;
+  for (const delayMs of [0, 1000, 3000]) {
+    if (delayMs) await new Promise((resolve) => setTimeout(resolve, delayMs));
+
+    try {
+      const res = await fetch(url, { redirect: 'follow' });
+      const text = await res.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        lastError = new Error(
+          `Apps Script returned non-JSON (HTTP ${res.status}).`
+        );
+        lastError.statusCode = 502;
+        console.error('Apps Script GET raw:', text.slice(0, 300));
+        continue;
+      }
+
+      if (!res.ok) {
+        lastError = new Error(
+          data.error || `Apps Script GET failed (HTTP ${res.status}).`
+        );
+        lastError.statusCode = 502;
+        continue;
+      }
+
+      return data;
+    } catch (err) {
+      lastError = err;
+    }
   }
-  return data;
+
+  throw lastError || new Error('Apps Script GET failed after retries.');
 }
