@@ -12,7 +12,8 @@ var CUSTOMERS_SHEET_ID = '1GFt_zd_h9vpfUP4ualeDfM8CxcJ3Fw7ou-q_UMzch8o';
 var CUSTOMERS_SHEET_NAME = 'ContactDetails';
 var CUSTOMERS_CACHE_SECONDS = 60;
 var DEFAULT_NOTIFY_EMAIL = 'accounts@canadasecuritygroup.com';
-var SCRIPT_VERSION = '2026-08-10-accounts-mail-v5';
+var SCRIPT_VERSION = '2026-08-25-shared-work-order-counter-v2';
+var WORK_ORDER_START_NUMBER = 1;
 
 function authorizeSetup() {
   SpreadsheetApp.openById(CUSTOMERS_SHEET_ID).getSheetByName(CUSTOMERS_SHEET_NAME);
@@ -65,6 +66,10 @@ function doPost(e) {
       return jsonResponse(addCustomer_(body));
     }
 
+    if (body.action === 'reserveWorkOrder') {
+      return jsonResponse(reserveWorkOrder_());
+    }
+
     // Default POST = send work order email
     return jsonResponse(processSend_(body));
   } catch (err) {
@@ -75,6 +80,37 @@ function doPost(e) {
       error: String(err && err.message ? err.message : err),
     });
   }
+}
+
+function reserveWorkOrder_() {
+  var lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+
+  try {
+    var year = new Date().getFullYear();
+    var key = 'work_order_counter_' + year;
+    var properties = PropertiesService.getScriptProperties();
+    var sequence = Number(properties.getProperty(key) || WORK_ORDER_START_NUMBER);
+
+    if (!isFinite(sequence) || sequence < WORK_ORDER_START_NUMBER) {
+      sequence = WORK_ORDER_START_NUMBER;
+    }
+
+    properties.setProperty(key, String(sequence + 1));
+
+    return {
+      ok: true,
+      action: 'reserveWorkOrder',
+      version: SCRIPT_VERSION,
+      workOrderNumber: formatWorkOrderNumber_(year, sequence),
+    };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function formatWorkOrderNumber_(year, sequence) {
+  return String(year).slice(-2) + String(sequence).padStart(3, '0');
 }
 
 function processSend_(body) {

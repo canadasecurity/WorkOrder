@@ -8,7 +8,6 @@ import {
   findCustomerByAddress,
   findCustomerByCorpNo,
 } from './customers.js';
-import { peekWorkOrderNumber, getNextWorkOrderNumber } from './work-order.js';
 import { collectFormState, saveFormState, loadFormState } from './form-state.js';
 import { showPreview, hidePreview, initPreviewControls } from './preview.js';
 import { submitWorkOrder, resolveRecipients } from './submit.js';
@@ -20,7 +19,7 @@ let isSending = false;
 
 export async function initForm() {
   renderHeader();
-  document.getElementById('workOrderNumber').textContent = peekWorkOrderNumber();
+  document.getElementById('workOrderNumber').textContent = '';
   setDefaultDates();
   populateTechnicians();
   await initCustomerFields();
@@ -66,10 +65,6 @@ async function handleSend() {
 
   try {
     const result = await submitWorkOrder(state);
-    // Advance work order number only after a successful send
-    getNextWorkOrderNumber();
-    document.getElementById('workOrderNumber').textContent =
-      peekWorkOrderNumber();
 
     alert(
       `Work order sent successfully!\n\nSent to:\n${(result.recipients || recipients).join('\n')}`

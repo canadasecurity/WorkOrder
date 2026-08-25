@@ -104,8 +104,46 @@ export async function submitWorkOrder(formState) {
     );
   }
 
-  const { pdfBase64, pdfFilename } = await captureWorkOrderPdf(formState);
-  const subject = `Work Order ${formState.workOrderNumber || ''} — ${
+  let numberResponse;
+  try {
+    const response = await fetch('/api/work-order-number', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    numberResponse = await response.json().catch(() => ({}));
+    if (!response.ok || !numberResponse.ok || !numberResponse.workOrderNumber) {
+      throw new Error(
+        numberResponse.error || `Number reservation failed (${response.status})`
+      );
+    }
+  } catch (err) {
+    throw new Error(`Could not reserve work-order number: ${err.message || err}`);
+  }
+
+  const submittedState = {
+    ...formState,
+    workOrderNumber: numberResponse.workOrderNumber,
+  };
+  const numberElement = document.getElementById('workOrderNumber');
+  const previewNumberElement = document.querySelector('.wo-number-box');
+  const previousNumber = numberElement?.textContent || '';
+  const previousPreviewNumber = previewNumberElement?.textContent || '';
+  if (numberElement) numberElement.textContent = submittedState.workOrderNumber;
+  if (previewNumberElement) {
+    previewNumberElement.textContent = submittedState.workOrderNumber;
+  }
+
+  let pdfBase64;
+  let pdfFilename;
+  try {
+    ({ pdfBase64, pdfFilename } = await captureWorkOrderPdf(submittedState));
+  } finally {
+    if (numberElement) numberElement.textContent = previousNumber;
+    if (previewNumberElement) {
+      previewNumberElement.textContent = previousPreviewNumber;
+    }
+  }
+  const subject = `Work Order ${submittedState.workOrderNumber} — ${
     formState.address || 'Canada Security Group'
   }`.trim();
 
@@ -115,7 +153,7 @@ export async function submitWorkOrder(formState) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        formData: formState,
+        formData: submittedState,
         customerEmails,
         subject,
         pdfBase64,

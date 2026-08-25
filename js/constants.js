@@ -19,18 +19,6 @@ export const COMPANY = {
     'We provide FOB/Remote and security credential for best market price',
 };
 
-/** Work order number generation settings */
-export const WORK_ORDER = {
-  /** Optional prefix before the number (e.g. "WO-") */
-  prefix: '',
-  /** Starting number when no prior work order exists in this browser */
-  startNumber: 2411551,
-  /** Pad numeric portion to this length (0 = no padding) */
-  padLength: 7,
-  /** localStorage key used to persist the next work order number */
-  storageKey: 'csp_work_order_counter',
-};
-
 /**
  * Technician names shown in the dropdown.
  * Add or remove names here — the form rebuilds the list on load.

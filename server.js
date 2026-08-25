@@ -69,6 +69,28 @@ app.post('/api/customers', async (req, res) => {
   }
 });
 
+app.post('/api/work-order-number', async (_req, res) => {
+  try {
+    const data = await callAppsScript(APPS_SCRIPT_URL, {
+      action: 'reserveWorkOrder',
+    });
+    if (!data.ok || !data.workOrderNumber) {
+      return res.status(502).json({
+        ok: false,
+        error: data.error || 'Apps Script did not return a work-order number.',
+        received: data,
+      });
+    }
+    res.json(data);
+  } catch (err) {
+    console.error('POST /api/work-order-number:', err);
+    res.status(err.statusCode || 500).json({
+      ok: false,
+      error: err.message || 'Failed to reserve work-order number',
+    });
+  }
+});
+
 app.post('/api/submit', async (req, res) => {
   try {
     const data = await callAppsScript(APPS_SCRIPT_URL, {
