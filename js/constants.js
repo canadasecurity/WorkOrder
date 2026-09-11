@@ -23,7 +23,7 @@ export const COMPANY = {
  * Technician names shown in the dropdown.
  * Add or remove names here — the form rebuilds the list on load.
  */
-export const TECHNICIANS = ['Lehri', 'Ariel', 'Cliff', 'Chris'];
+export const TECHNICIANS = ['Lehri', 'Ariel', 'Cliff', 'Chris','Alican'];
 
 /**
  * Always receives a copy of every work order.
