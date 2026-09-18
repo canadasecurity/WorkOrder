@@ -325,6 +325,10 @@
   vertical-align: middle;
 }
 
+.wo-time-table .wo-empty-time-row td {
+  height: 24px;
+}
+
 .wo-time-table th {
   background: #e6e6e6;
   font-weight: 700;

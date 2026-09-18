@@ -34,6 +34,15 @@ function renderPreview(state) {
   const services = COMPANY.services.map((s) => `• ${s}`).join('  ');
   const matsLeft = padMaterials((state.materials || []).slice(0, 5), 5);
   const matsRight = padMaterials((state.materials || []).slice(5, 10), 5);
+  const technicianRows = state.technicianRows?.length
+    ? state.technicianRows
+    : [{
+        serviceDate: state.serviceDate,
+        technician: state.technician,
+        startTime: state.startTime,
+        endTime: state.endTime,
+        totalHours: state.totalHours,
+      }];
 
   root.innerHTML = `
     <div class="wo-page" id="woPage">
@@ -112,14 +121,8 @@ function renderPreview(state) {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>${escapeHtml(formatDate(state.serviceDate))}</td>
-              <td>${escapeHtml(state.technician)}</td>
-              <td>${escapeHtml(state.startTime)}</td>
-              <td>${escapeHtml(state.endTime)}</td>
-              <td>${escapeHtml(state.totalHours)}</td>
-            </tr>
-            <tr>
+            ${technicianRows.map((row) => `<tr><td>${escapeHtml(formatDate(row.serviceDate))}</td><td>${escapeHtml(row.technician)}</td><td>${escapeHtml(row.startTime)}</td><td>${escapeHtml(row.endTime)}</td><td>${escapeHtml(row.totalHours)}</td></tr>`).join('')}
+            <tr class="wo-empty-time-row">
               <td></td><td></td><td></td><td></td><td></td>
             </tr>
           </tbody>

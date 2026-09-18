@@ -27,6 +27,17 @@ export function collectFormState(form) {
     corpSelectEl?.value.trim() ||
     '';
 
+  const technicianRows = [...form.querySelectorAll('.technician-row')].map((row) => ({
+    serviceDate: row.querySelector('[name^="serviceDate"]')?.value || '',
+    technician:
+      row.querySelector('.technician-select')?.tomselect?.getValue?.() ||
+      row.querySelector('.technician-select')?.value ||
+      '',
+    startTime: row.querySelector('[name^="startTime"]')?.value || '',
+    endTime: row.querySelector('[name^="endTime"]')?.value || '',
+    totalHours: row.querySelector('[name^="totalHours"]')?.value || '',
+  }));
+
   return {
     workOrderNumber:
       document.querySelector('#workOrderNumber')?.textContent?.trim() || '',
@@ -39,14 +50,12 @@ export function collectFormState(form) {
     recommendation: form.querySelector('#recommendation')?.value.trim() || '',
     jobDescription: form.querySelector('#jobDescription')?.value.trim() || '',
     materials,
-    serviceDate: form.querySelector('#serviceDate')?.value || '',
-    technician:
-      form.querySelector('#technician')?.tomselect?.getValue?.() ||
-      form.querySelector('#technician')?.value ||
-      '',
-    startTime: form.querySelector('#startTime')?.value || '',
-    endTime: form.querySelector('#endTime')?.value || '',
-    totalHours: form.querySelector('#totalHours')?.value || '',
+    technicianRows,
+    serviceDate: technicianRows[0]?.serviceDate || '',
+    technician: technicianRows.map((row) => row.technician).filter(Boolean).join(', '),
+    startTime: technicianRows[0]?.startTime || '',
+    endTime: technicianRows[0]?.endTime || '',
+    totalHours: technicianRows[0]?.totalHours || '',
     technicianSignature:
       document
         .getElementById('technicianSignatureCanvas')
