@@ -74,7 +74,7 @@ async function handleSend() {
     setDefaultDates();
     addressSelect?.clear?.(true);
     corpSelect?.clear?.(true);
-    document.getElementById('technician')?.tomselect?.clear?.(true);
+    resetTechnicianRows();
     document.getElementById('corporationNo').value = '';
     document.getElementById('clearTechnicianSig')?.click();
     document.getElementById('clearCustomerSig')?.click();
@@ -105,12 +105,14 @@ function renderHeader() {
 function setDefaultDates() {
   const today = new Date().toISOString().slice(0, 10);
   document.getElementById('formDate').value = today;
-  document.getElementById('serviceDate').value = today;
+  document.querySelectorAll('[name^="serviceDate"]').forEach((input) => {
+    input.value = today;
+  });
 }
 
 function populateTechnicians() {
-  const select = document.getElementById('technician');
-  if (!select) {
+  const selects = [...document.querySelectorAll('.technician-select')];
+  if (selects.length === 0) {
     console.error('Technician select #technician not found');
     return;
   }
@@ -119,13 +121,18 @@ function populateTechnicians() {
     ? TECHNICIANS.map((n) => String(n).trim()).filter(Boolean)
     : [];
 
-  // Rebuild from constants.js (source of truth)
-  select.innerHTML = '';
-  const placeholder = document.createElement('option');
-  placeholder.value = '';
-  placeholder.textContent = 'Select technician…';
-  select.appendChild(placeholder);
+  selects.forEach((select) => initializeTechnicianSelect(select, names));
 
+  if (names.length === 0) {
+    console.warn('TECHNICIANS is empty in js/constants.js');
+  } else {
+    console.info('Technician options loaded:', names.join(', '));
+  }
+}
+
+function initializeTechnicianSelect(select, names) {
+  if (select.tomselect) select.tomselect.destroy();
+  select.innerHTML = '<option value="">Select technician…</option>';
   names.forEach((name) => {
     const opt = document.createElement('option');
     opt.value = name;
@@ -133,11 +140,7 @@ function populateTechnicians() {
     select.appendChild(opt);
   });
 
-  // Use Tom Select so options are clearly visible (same UX as Address)
   if (window.TomSelect) {
-    if (select.tomselect) {
-      select.tomselect.destroy();
-    }
     new TomSelect(select, {
       create: false,
       allowEmptyOption: true,
@@ -145,12 +148,56 @@ function populateTechnicians() {
       maxOptions: null,
     });
   }
+}
 
-  if (names.length === 0) {
-    console.warn('TECHNICIANS is empty in js/constants.js');
-  } else {
-    console.info('Technician options loaded:', names.join(', '));
-  }
+function addTechnicianRow() {
+  const rows = document.getElementById('technicianRows');
+  const firstRow = rows?.querySelector('.technician-row');
+  if (!rows || !firstRow) return;
+
+  const index = rows.querySelectorAll('.technician-row').length + 1;
+  const row = document.createElement('div');
+  row.className = 'row g-3 technician-row';
+  row.dataset.rowIndex = String(index);
+  row.innerHTML = `
+    <div class="col-sm-6 col-lg">
+      <label for="serviceDate_${index}" class="form-label">Date</label>
+      <input type="date" class="form-control" id="serviceDate_${index}" name="serviceDate_${index}" />
+    </div>
+    <div class="col-sm-6 col-lg">
+      <label for="technician_${index}" class="form-label required">Technician</label>
+      <select class="form-select technician-select" id="technician_${index}" name="technician_${index}" required></select>
+    </div>
+    <div class="col-sm-4 col-lg">
+      <label for="startTime_${index}" class="form-label">Start Time</label>
+      <input type="text" class="form-control time-input" id="startTime_${index}" name="startTime_${index}" placeholder="Tap to select time" autocomplete="off" />
+    </div>
+    <div class="col-sm-4 col-lg">
+      <label for="endTime_${index}" class="form-label">End Time</label>
+      <input type="text" class="form-control time-input" id="endTime_${index}" name="endTime_${index}" placeholder="Tap to select time" autocomplete="off" />
+    </div>
+    <div class="col-sm-4 col-lg">
+      <label for="totalHours_${index}" class="form-label">Total Hours</label>
+      <div class="input-group">
+        <input type="text" class="form-control" id="totalHours_${index}" name="totalHours_${index}" readonly placeholder="Auto" />
+        <button type="button" class="btn btn-outline-secondary remove-technician" aria-label="Remove technician" title="Remove technician">−</button>
+      </div>
+    </div>`;
+  rows.appendChild(row);
+
+  const names = TECHNICIANS.map((name) => String(name).trim()).filter(Boolean);
+  initializeTechnicianSelect(row.querySelector('.technician-select'), names);
+  row.querySelectorAll('.time-input').forEach((input) => initializeTimePicker(input));
+  initializeTimeCalculation(row);
+  row.querySelector(`[name="serviceDate_${index}"]`).value =
+    document.getElementById('serviceDate')?.value || '';
+  row.querySelector('.remove-technician').addEventListener('click', () => row.remove());
+}
+
+function resetTechnicianRows() {
+  const rows = document.getElementById('technicianRows');
+  rows?.querySelectorAll('.technician-row:not(:first-child)').forEach((row) => row.remove());
+  document.getElementById('technician')?.tomselect?.clear?.(true);
 }
 
 async function initCustomerFields() {
@@ -418,23 +465,33 @@ function initTimePickers() {
     clearBtn: true
   };
 
-  ['startTime', 'endTime'].forEach((id) => {
-    const input = document.getElementById(id);
-    input.setAttribute('readonly', 'readonly');
-    input.setAttribute('placeholder', 'Tap to select time');
-    window.mdtimepicker(input, options);
-  });
+  document.querySelectorAll('.time-input').forEach((input) => initializeTimePicker(input, options));
 }
 
 function initTimeCalculation() {
-  const start = document.getElementById('startTime');
-  const end = document.getElementById('endTime');
-  const total = document.getElementById('totalHours');
+  document.querySelectorAll('.technician-row').forEach((row) => initializeTimeCalculation(row));
+}
 
-  function update() {
-    total.value = calcTotalHours(start.value, end.value);
-  }
+function initializeTimePicker(input, options = {
+  theme: 'blue',
+  format: 'h:mm tt',
+  hourPadding: true,
+  clearBtn: true,
+}) {
+  if (!input || input.dataset.timepickerInitialized || typeof window.mdtimepicker !== 'function') return;
+  input.dataset.timepickerInitialized = 'true';
+  input.setAttribute('readonly', 'readonly');
+  input.setAttribute('placeholder', 'Tap to select time');
+  window.mdtimepicker(input, options);
+}
 
+function initializeTimeCalculation(row) {
+  const start = row.querySelector('[name^="startTime"]');
+  const end = row.querySelector('[name^="endTime"]');
+  const total = row.querySelector('[name^="totalHours"]');
+  if (!start || !end || !total || row.dataset.calculationInitialized) return;
+  row.dataset.calculationInitialized = 'true';
+  const update = () => { total.value = calcTotalHours(start.value, end.value); };
   ['change', 'input', 'timechanged'].forEach((evt) => {
     start.addEventListener(evt, update);
     end.addEventListener(evt, update);
@@ -476,6 +533,7 @@ function calcTotalHours(start, end) {
 
 function bindEvents() {
   const form = document.getElementById('workOrderForm');
+  document.getElementById('addTechnician')?.addEventListener('click', addTechnicianRow);
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     if (!validateForm(form)) return;
@@ -504,10 +562,7 @@ function validateForm(form) {
     '';
   const date = form.querySelector('#formDate').value;
   const jobDescription = form.querySelector('#jobDescription').value.trim();
-  const technician =
-    form.querySelector('#technician')?.tomselect?.getValue?.() ||
-    form.querySelector('#technician')?.value ||
-    '';
+  const technicianRows = [...form.querySelectorAll('.technician-row')];
   const customerName = form.querySelector('#customerName').value.trim();
   const materialsFeedback = document.getElementById('materialsFeedback');
   const materialsCard = document.getElementById('materialsCard');
@@ -527,9 +582,16 @@ function validateForm(form) {
     form.querySelector('#jobDescription').focus();
     return false;
   }
-  if (!technician) {
-    alert('Please select a technician.');
-    form.querySelector('#technician')?.tomselect?.focus();
+  const missingTechnician = technicianRows.find(
+    (row) => !(
+      row.querySelector('.technician-select')?.tomselect?.getValue?.() ||
+      row.querySelector('.technician-select')?.value ||
+      ''
+    )
+  );
+  if (missingTechnician) {
+    alert('Please select a technician for every row.');
+    missingTechnician.querySelector('.technician-select')?.tomselect?.focus();
     return false;
   }
   if (!customerName) {

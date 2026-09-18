@@ -125,6 +125,18 @@ body {
   background-color: #fff;
 }
 
+.technician-add {
+  min-width: 2rem;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.technician-row + .technician-row {
+  border-top: 1px solid #dee2e6;
+  margin-top: 1rem;
+  padding-top: 1rem;
+}
+
 /* Keep Tom Select usable on mobile */
 .ts-wrapper.form-select {
   padding: 0;
